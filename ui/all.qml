@@ -8,6 +8,11 @@ Mycroft.Delegate {
     id: mainLoaderView
     anchors.fill: parent
     property var pageToLoad: sessionData.state
+    property var newsModel: sessionData.newsData
+    
+    onNewsModelChanged: {
+        console.log(newsModel)
+    }
     
     Loader {
         id: rootLoader

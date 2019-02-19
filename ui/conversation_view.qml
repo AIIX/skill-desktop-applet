@@ -8,6 +8,11 @@ import Mycroft 1.0 as Mycroft
 Item {
     id: root
     anchors.fill: parent
+    property var incomingMessage: sessionData.inputQuery
+    
+    onIncomingMessageChanged: {
+        pushMessage(incomingMessage, true)
+    }
     
     function pushMessage(text, inbound) {
         conversationModel.append({"text": text, "inbound": inbound});

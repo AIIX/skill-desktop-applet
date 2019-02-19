@@ -13,11 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import astral
+import pyaudio
+import struct
+import math
+import re
+import sys
+import json
+import requests
 import time
-import arrow
-from pytz import timezone
-from datetime import datetime
 
 from mycroft.messagebus.message import Message
 from mycroft.skills.core import MycroftSkill
@@ -27,14 +30,13 @@ from mycroft.util.parse import normalize
 from mycroft.audio import wait_while_speaking
 from mycroft import intent_file_handler
 
-import pyaudio
-import struct
-import math
 from threading import Thread
 
 class MycroftDesktopApplet(MycroftSkill):
 
     IDLE_CHECK_FREQUENCY = 6  # in seconds
+    dashboard_news_items = ""
+    dashboard_weather_items = ""
 
     def __init__(self):
         super().__init__("MycroftDesktopApplet")
@@ -54,10 +56,11 @@ class MycroftDesktopApplet(MycroftSkill):
             self.start_idle_check()
 
             # Handle the 'busy' visual
-            self.add_event('mycroft.gui.connected', self.handle_display_conversation_view)
-            self.bus.on('mycroft.skills.initialized', self.handle_display_conversation_view)
+            self.add_event('mycroft.gui.connected', self.handle_placeholder_view)
+            #self.bus.on('mycroft.skills.initialized', self.handle_display_conversation_view)
             self.gui.register_handler('mycroft.desktop.applet.show_conversationview', self.handle_display_conversation_view)
-                        
+            self.gui.register_handler('mycroft.qinput.text', self.get_message_query)
+    
         except Exception:
             LOG.exception('In Mycroft Applet Skill')
 
@@ -85,7 +88,7 @@ class MycroftDesktopApplet(MycroftSkill):
             if self.idle_count == 5:
                 # Go into a 'sleep' visual state
                 #self.bus.emit(Message('mycroft-date-time.mycroftai.idle'))
-                self.switch_to_conversation_view()
+                self.switch_to_dashboard_view()
             elif self.idle_count > 5:
                 self.cancel_scheduled_event('IdleCheck')
 
@@ -102,16 +105,58 @@ class MycroftDesktopApplet(MycroftSkill):
                 # Begin checking for the idle state again
                 self.idle_count = 0
                 self.start_idle_check()
+                
+    def get_message_query(self, message):
+        self.gui['inputQuery'] = message.data['inputQuery'] 
+        self.gui['state'] = 'conversation_view'
+        self.gui.show_page('all.qml')
+        
+    def handle_placeholder_view(self):
+        self.handle_dashboard_news_layer()
+        self.gui['state'] = 'placeholder_view'
+        self.gui['newsData'] = dashboard_news_items
+        self.gui.show_page('all.qml')
 
     def switch_to_conversation_view(self):
         self.gui['state'] = 'conversation_view'
+        self.gui['newsData'] = dashboard_news_items
         self.gui.show_page('all.qml')
     
+    def switch_to_dashboard_view(self):
+        self.gui['state'] = 'dashboard_view'
+        self.gui['newsData'] = dashboard_news_items
+        self.gui.show_page('all.qml')
+        
     @intent_file_handler('show.convo.view.intent')
     def handle_display_conversation_view(self, message):
         self.gui['state'] = 'conversation_view'
-        self.gui['inputQuery'] = message.data['inputQuery']
+        if message['inputQuery']:
+            self.gui['inputQuery'] = message.data['inputQuery']
+        else:
+            self.gui['inputQuery'] = "" 
         self.gui.show_page('all.qml')
-
+    
+    def handle_display_dashboard_view(self, message):
+        self.gui['state'] = 'dashboard_view'
+        self.gui.show_page('all.qml')
+    
+    def handle_dashboard_news_layer(self):
+        """ 
+        News Ideal Screen Test Intent
+        """
+        getNewsLang = self.lang.split("-")
+        newsLang = getNewsLang[1]
+        newsAPIURL = 'https://newsapi.org/v2/top-headlines?country=in&apiKey=a1091945307b434493258f3dd6f36698'.format(newsLang)
+        newsAPIRespone = requests.get(newsAPIURL)
+        newsItems = newsAPIRespone.json()
+        global dashboard_news_items
+        dashboard_news_items = newsItems
+        
+    def handle_dashboard_extras_layer(self, message):
+        """
+        Add PlaceHolder For Extra Items Like Timer Notifications
+        """
+        print("a")
+        
 def create_skill():
     return MycroftDesktopApplet()
