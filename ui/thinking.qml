@@ -1,118 +1,44 @@
+/*
+ * Copyright 2018 by Aditya Mehra <aix.m@outlook.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 import QtQuick.Layouts 1.4
 import QtQuick 2.4
 import QtQuick.Controls 2.0
-import org.kde.kirigami 2.4 as Kirigami
-
+import org.kde.kirigami 2.5 as Kirigami
+import org.kde.plasma.networkmanagement 0.2 as PlasmaNM
 import Mycroft 1.0 as Mycroft
 
+import org.kde.lottie 1.0
+
+
 Item {
-    id: "thinking"
-    Item {
-        id: top_spacing
-        anchors.top: parent.top
-        height: 176
-    }
-    Rectangle {
-        id: eyes
-        anchors.top: top_spacing.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width
-        height: 141
-        color: "#00000000"
-        Rectangle {
-            id: rectangle
-            anchors.left: parent.left
-            anchors.leftMargin: 12
-            width: 141
-            color: "#00000000"
-            Image {
-                id: left_eye
-                anchors.horizontalCenter: parent.horizontalCenter
-                y: 0
-                width: 141
-                source: Qt.resolvedUrl("face/Eyeball.svg")
-                fillMode: Image.PreserveAspectFit
-            }
-            Image {
-                id: left_eye_upper
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: 141
-                fillMode: Image.PreserveAspectFit
-                source: Qt.resolvedUrl("face/upper-lid.svg")
-            }
-        } 
-        Rectangle {
-            anchors.right: parent.right
-            anchors.rightMargin: 12
-            id: rectangle2
-            width: 141
-            color: "#00000000"
-
-            Image {
-                id: right_eye
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: 141
-                fillMode: Image.PreserveAspectFit
-                source: Qt.resolvedUrl("face/Eyeball.svg")
-            }
-            Image {
-                id: right_eye_upper
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: 141
-                fillMode: Image.PreserveAspectFit
-                source: Qt.resolvedUrl("face/upper-lid.svg")
-            }
-        }
-    }
+    id: successView
+    anchors.fill: parent
     
-    Item {
-        id: mid_spacing
-        anchors.top: eyes.bottom
-        height: 112
-    }
-
-    Rectangle {
-        id: mouth_rectangle
-        anchors.top: mid_spacing.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: 266
-        height: 115
-        color: "#00000000"
-        Image {
-            id: smile
-            opacity: 1
-            anchors.centerIn: parent
-            anchors.horizontalCenter: parent.horizontalCenter
+    ColumnLayout {
+        anchors.fill: parent
+        LottieAnimation {
+            id: successAnimation
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            source: Qt.resolvedUrl("Animations/thinking.json")
+            loops: 100
             fillMode: Image.PreserveAspectFit
-            width: 266
-            source: Qt.resolvedUrl('face/Smile.svg')
-        }
-    }
-    Rectangle {
-        id: hide_smile
-        color: "black"
-        y: 450
-        x: 20
-        width: 80
-        height: 80
-    }
-
-    SequentialAnimation {
-        loops: Animation.Infinite
-        running: true
-        PropertyAnimation {
-            id: fade;
-            target: hide_smile;
-            property: "x";
-            to: 450;
-            duration: 500
-        }
-        PropertyAnimation {
-            id: unfade;
-            target: hide_smile;
-            property: "x";
-            to: 50;
-            duration: 500
-        }
+            running: true
+        }    
     }
 }
