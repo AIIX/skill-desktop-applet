@@ -58,6 +58,7 @@ class MycroftDesktopApplet(MycroftSkill):
             # Handle the 'busy' visual
             self.add_event('mycroft.gui.connected', self.handle_placeholder_view)
             self.add_event('recognizer_loop:record_end', self.handle_listener_ended)
+            self.add_event('enclosure.mouth.text', self.on_mouth_text)
             #self.bus.on('mycroft.skills.initialized', self.handle_display_conversation_view)
             self.gui.register_handler('mycroft.desktop.applet.show_conversationview', self.handle_display_conversation_view)
             self.gui.register_handler('mycroft.qinput.text', self.get_message_query)
@@ -107,6 +108,12 @@ class MycroftDesktopApplet(MycroftSkill):
                 self.idle_count = 0
                 self.start_idle_check()
                 
+    def on_mouth_text(self, message):
+        text = message.data.get('text')
+        self.gui.clear()
+        self.gui['message_text'] = text
+        self.gui.show_page('mouth_text.qml')
+        
     def handle_listener_ended(self, message):
         """ When listening has ended show the thinking animation. """
         self.gui['state'] = 'thinking'
