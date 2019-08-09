@@ -31,7 +31,7 @@ Item {
 	height: parent.height
             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
             Rectangle {
-                height: 600
+                height: 300
                 width: 60
                 color: "#00000000"
                 Rectangle {
@@ -41,11 +41,11 @@ Item {
                     width: 36
                     radius: 18
                     height: getLength(sessionData.volume, -2)
-                    color: "#40DBB0"
+                    color: Kirigami.Theme.linkColor
                 }
             }
             Rectangle {
-                height: 600
+                height: 300
                 width: 60
                 color: "#00000000"
                 Rectangle {
@@ -55,11 +55,11 @@ Item {
                     width: 36
                     radius: 18
                     height: getLength(sessionData.volume, -1)
-                    color: "#40DBB0"
+                    color: Kirigami.Theme.linkColor
                 }
             }
             Rectangle {
-                height: 600
+                height: 300
                 width: 60
                 color: "#00000000"
                 Rectangle {
@@ -69,11 +69,11 @@ Item {
                     width: 36
                     radius: 18
                     height: getLength(sessionData.volume, 0)
-                    color: "#40DBB0"
+                    color: Kirigami.Theme.linkColor
                 }
             }
             Rectangle {
-                height: 600
+                height: 300
                 width: 60
                 color: "#00000000"
                 Rectangle {
@@ -83,11 +83,11 @@ Item {
                     width: 36
                     radius: 18
                     height: getLength(sessionData.volume, -1)
-                    color: "#40DBB0"
+                    color: Kirigami.Theme.linkColor
                 }
             }
             Rectangle {
-                height: 600
+                height: 300
                 width: 60
                 color: "#00000000"
                 Rectangle {
@@ -97,7 +97,7 @@ Item {
                     width: 36
                     radius: 18
                     height: getLength(sessionData.volume, -2)
-                    color: "#40DBB0"
+                    color: Kirigami.Theme.linkColor
                 }
             }
         }

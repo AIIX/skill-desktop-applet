@@ -6,21 +6,19 @@ import Mycroft 1.0 as Mycroft
 
 Mycroft.Delegate {
     id: mainLoaderView
-    anchors.fill: parent
+
     property var pageToLoad: sessionData.state
-    property var newsModel: sessionData.newsData
+    property var idleScreenList: sessionData.idleScreenList
+    property var activeIdle: sessionData.selectedScreen
+    property var settingsScreenList: sessionData.settingsScreenList
+    property var skillConfig: sessionData.skillConfig
     
-    onNewsModelChanged: {
-        console.log(newsModel)
-    }
-    
-    Loader {
+    contentItem: Loader {
         id: rootLoader
-        anchors.fill: parent
     }
-    
+
     onPageToLoadChanged: {
         console.log(sessionData.state)
-        rootLoader.setSource(sessionData.state + ".qml")
+        rootLoader.setSource(sessionData.state + ".qml")        
     }
 }
