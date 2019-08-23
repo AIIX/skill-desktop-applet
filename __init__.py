@@ -31,6 +31,7 @@ from mycroft.util import get_ipc_directory
 from mycroft.util.log import LOG
 from mycroft.util.parse import normalize
 from mycroft import intent_file_handler
+from mycroft.skills.core import resting_screen_handler
 
 import os
 import subprocess
@@ -40,6 +41,7 @@ from threading import Thread, Lock
 
 from .listener import (get_rms, open_mic_stream, read_file_from,
                        INPUT_FRAMES_PER_BLOCK)
+from collections import Counter
 
 class MycroftDesktopApplet(MycroftSkill):
 
@@ -49,6 +51,7 @@ class MycroftDesktopApplet(MycroftSkill):
     def __init__(self):
         super().__init__("MycroftDesktopApplet")
 
+        self.previousMessage = ""
         self.idle_screens = {}
         self.override_idle = None
         self.idle_next = 0  # Next time the idle screen should trigger
@@ -92,8 +95,9 @@ class MycroftDesktopApplet(MycroftSkill):
         self.gui['selected'] = self.settings.get('selected', 'Time and Date')
         self.gui.set_on_gui_changed(self.save_resting_screen)
         
-        try:                        
-            self.add_event('enclosure.mouth.text', self.on_mouth_text)
+        try:
+            self.add_event('skill.desktop.applet.conversation', self.buildConversationMessage)
+            self.add_event('skill.desktop.applet.prevMessage', self.prevMessage)
             # Handle the 'waking' visual
             self.add_event('recognizer_loop:record_begin',
                            self.handle_listener_started)
@@ -128,16 +132,9 @@ class MycroftDesktopApplet(MycroftSkill):
             self.gui.register_handler('mycroft.device.set.idle',
                                       self.set_idle_screen)
 
-            # Show loading screen while starting up skills.
-            self.gui['state'] = 'loading'
-            self.gui.show_page('all.qml')
-
             # Collect Idle screens and display if skill is restarted
             self.collect_resting_screens()
-        
-            self.gui.register_handler('mycroft.desktop.applet.show_conversationview', self.handle_display_conversation_view)
-            self.gui.register_handler('mycroft.qinput.text', self.get_message_query)
-    
+            
         except Exception:
             LOG.exception('In Mycroft Applet Skill')
 
@@ -451,58 +448,31 @@ class MycroftDesktopApplet(MycroftSkill):
         """ Set selected idle screen from message. """
         self.gui['selected'] = message.data['selected']
         self.save_resting_screen()
+            
+    @resting_screen_handler('Conversation View')
+    def handle_idle(self, message):
+        self.gui['query'] = ""
+        self.gui['speak'] = ""
+        self.gui['queryInbound'] = False
+        self.gui['speakOutbound'] = True
+        self.log.info('Activating Conversation View')
+        self.gui.show_page('idle.qml')
     
-    def on_mouth_text(self, message):
-        text = message.data.get('text')
-        self.gui.clear()
-        self.gui['message_text'] = text
-        self.gui.show_page('mouth_text.qml')
-        
-    def get_message_query(self, message):
-        self.gui['inputQuery'] = message.data['inputQuery'] 
-        self.gui['state'] = 'conversation_view'
-        self.gui.show_page('all.qml')
-        
-    def handle_placeholder_view(self):
-        self.handle_dashboard_news_layer()
-        self.gui['state'] = 'placeholder_view'
-        self.gui['newsData'] = dashboard_news_items
-        self.gui.show_page('all.qml')
-
-    def switch_to_conversation_view(self):
-        self.gui['state'] = 'conversation_view'
-        self.gui['newsData'] = dashboard_news_items
-        self.gui.show_page('all.qml')
+    def prevMessage(self, message):
+        self.previousMessage = message.data["previousMessage"]
     
-    def switch_to_dashboard_view(self):
-        self.gui['state'] = 'dashboard_view'
-        self.gui['newsData'] = dashboard_news_items
-        self.gui.show_page('all.qml')
-        
-    @intent_file_handler('show.convo.view.intent')
-    def handle_display_conversation_view(self, message):
-        self.gui['state'] = 'conversation_view'
-        if message['inputQuery']:
-            self.gui['inputQuery'] = message.data['inputQuery']
+    def buildConversationMessage(self, message):
+        LOG.info("1:Previous")
+        LOG.info(self.previousMessage)
+        LOG.info("2:New")
+        LOG.info(message.data['speak'])
+        if Counter(self.previousMessage) == Counter(message.data['speak']):
+            LOG.info("SameIgnore")
         else:
-            self.gui['inputQuery'] = "" 
-        self.gui.show_page('all.qml')
-    
-    def handle_display_dashboard_view(self, message):
-        self.gui['state'] = 'dashboard_view'
-        self.gui.show_page('all.qml')
-    
-    def handle_dashboard_news_layer(self):
-        """ 
-        News Ideal Screen Test Intent
-        """
-        getNewsLang = self.lang.split("-")
-        newsLang = getNewsLang[1]
-        newsAPIURL = 'https://newsapi.org/v2/top-headlines?country=in&apiKey=a1091945307b434493258f3dd6f36698'.format(newsLang)
-        newsAPIRespone = requests.get(newsAPIURL)
-        newsItems = newsAPIRespone.json()
-        global dashboard_news_items
-        dashboard_news_items = newsItems
-
+            self.gui['query'] = message.data['query']
+            self.gui['queryInbound'] = False
+            self.gui['speak'] = message.data['speak']
+            self.gui['speakOutbound'] = True
+        
 def create_skill():
     return MycroftDesktopApplet()

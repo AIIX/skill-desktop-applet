@@ -8,10 +8,17 @@ import Mycroft 1.0 as Mycroft
 Item {
     id: root
     anchors.fill: parent
-    property var incomingMessage: sessionData.inputQuery
+    property var incomingUtterance: idleLoaderView.utterance
+    property var incomingMessage: idleLoaderView.speak
+    property bool incomingUtteranceInbound: idleLoaderView.queryInbound
+    property bool incomingMessageInbound: idleLoaderView.speakInbound
     
     onIncomingMessageChanged: {
-        pushMessage(incomingMessage, true)
+        if(incomingMessage !== ""){
+            Mycroft.MycroftController.sendRequest("skill.desktop.applet.prevMessage", {"previousMessage": incomingMessage})
+            pushMessage(incomingUtterance, incomingUtteranceInbound)
+            pushMessage(incomingMessage, incomingMessageInbound)
+        }
     }
     
     function pushMessage(text, inbound) {
@@ -26,20 +33,12 @@ Item {
         pushMessage(i18n("How can I help you?"), false);
     }
     
-    Connections {
-        id: mycroftConnection
-        target: Mycroft.MycroftController
-        onFallbackTextRecieved: {
-            pushMessage(data.utterance, true);
-        }
-    }
-    
     ListView {
         id: mainView
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.bottom: bottomSuggestBox.top
+        anchors.bottom: parent.bottom
         spacing: Kirigami.Units.largeSpacing
         topMargin: Math.max(0, height - contentHeight - Kirigami.Units.largeSpacing * 3)
         bottomMargin: Kirigami.Units.largeSpacing
@@ -49,15 +48,5 @@ Item {
                     id: conversationModel
         }
         delegate: ConversationDelegate {}
-    }
-    
-    Suggestions {
-        id: bottomSuggestBox
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.leftMargin: -1 * Kirigami.Units.largeSpacing
-        anchors.rightMargin: -1 * Kirigami.Units.largeSpacing
-        anchors.right: parent.right
-        height: Kirigami.Units.gridUnit * 2
     }
 }
