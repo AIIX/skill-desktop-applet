@@ -51,7 +51,7 @@ Item {
         }
         background: Rectangle {
             radius: Kirigami.Units.gridUnit/2
-            color: Kirigami.Theme.backgroundColor
+            color: model.inbound ? Kirigami.Theme.backgroundColor : Kirigami.Theme.linkColor
 
             Rectangle {
                 anchors {
@@ -62,7 +62,7 @@ Item {
                 }
                 width: Kirigami.Units.gridUnit
                 height: width
-                color: Kirigami.Theme.backgroundColor
+                color: model.inbound ? Kirigami.Theme.backgroundColor : Kirigami.Theme.linkColor
             }
 
             layer.enabled: true

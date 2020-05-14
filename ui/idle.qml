@@ -10,6 +10,7 @@ Mycroft.Delegate {
     property var utterance: sessionData.query
     property bool speakInbound: sessionData.speakOutbound
     property bool utteranceInbound: sessionData.queryInbound
+    property bool firstCheck: sessionData.firstCheck
     
     contentItem: Loader {
         id: rootLoader

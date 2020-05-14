@@ -12,9 +12,10 @@ Item {
     property var incomingMessage: idleLoaderView.speak
     property bool incomingUtteranceInbound: idleLoaderView.queryInbound
     property bool incomingMessageInbound: idleLoaderView.speakInbound
+    property bool isFirstCheck: idleLoaderView.firstCheck
     
     onIncomingMessageChanged: {
-        if(incomingMessage !== ""){
+        if(incomingMessage && incomingUtterance && !isFirstCheck){
             Mycroft.MycroftController.sendRequest("skill.desktop.applet.prevMessage", {"previousMessage": incomingMessage})
             pushMessage(incomingUtterance, incomingUtteranceInbound)
             pushMessage(incomingMessage, incomingMessageInbound)
@@ -28,9 +29,9 @@ Item {
         }
         mainView.flick(0, -500);
     }
-    
+     
     Component.onCompleted: {
-        pushMessage(i18n("How can I help you?"), false);
+        pushMessage(i18n("Hey There! how may I assist you today?"), false);
     }
     
     ListView {
@@ -45,7 +46,7 @@ Item {
         anchors.margins: Kirigami.Units.largeSpacing
         clip: true
         model: ListModel {
-                    id: conversationModel
+            id: conversationModel
         }
         delegate: ConversationDelegate {}
     }
