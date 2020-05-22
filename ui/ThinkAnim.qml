@@ -7,7 +7,7 @@ AnimatedImage {
     id: thinkingGIF
     height: Math.min(parent.width, parent.height)
     anchors.centerIn: parent
-    source: Qt.resolvedUrl("Animations/resting.gif")
+    source: Qt.resolvedUrl("Animations/thinking.gif")
     fillMode: Image.PreserveAspectFit
     playing: true
 }

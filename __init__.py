@@ -395,7 +395,6 @@ class MycroftDesktopApplet(MycroftSkill):
         """
         self.log.debug('Showing idle screen')
         self.gui.clear()
-        self.enclosure.display_manager.remove_active()
         self.handle_idle({})
             
     def handle_listener_started(self, message):
